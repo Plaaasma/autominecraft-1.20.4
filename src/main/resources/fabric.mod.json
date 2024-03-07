@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "autominecraft",
+	"version": "${version}",
+	"name": "AutoMinecraft",
+	"description": "Beat minecraft with a single command",
+	"authors": [
+		"Plaaasma"
+	],
+	"contact": {
+		"homepage": "https://yourmom.com/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/autominecraft/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.plaaasma.autominecraft.AutoMinecraft"
+		]
+	},
+	"mixins": [
+		"autominecraft.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.7",
+		"minecraft": "~1.20.4",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
