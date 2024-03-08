@@ -56,27 +56,37 @@ public class BaritoneUtil {
             for (RecipeEntry<CraftingRecipe> recipeEntry: craftingRecipes) {
                 if (recipeEntry.toString().substring(recipeEntry.toString().indexOf(":") + 1).equals(item.toString())) {
                     List<Ingredient> ingredients = recipeEntry.value().getIngredients();
-                    int neededIngredientAmount = ingredients.size();
-                    int ingredientAmount = 0;
+                    HashMap<Item, Integer> combinedIngredientsMap = new HashMap<>();
                     for (Ingredient ingredient : ingredients) {
-                        boolean has_ingredient = false;
                         List<ItemStack> ingredientStacks = Arrays.asList(ingredient.getMatchingStacks());
                         for (ItemStack ingredientStack : ingredientStacks) {
-                            if (ProgressChecks.hasItem(ingredientStack.getItem(), ingredientStack.getCount(), player.getInventory())) {
-                                has_ingredient = true;
+                            if (ProgressChecks.hasItem(ingredientStack.getItem(), ingredientStack.getCount(), player.currentScreenHandler)) {
+                                if (combinedIngredientsMap.containsKey(ingredientStack.getItem())) {
+                                    combinedIngredientsMap.put(ingredientStack.getItem(), combinedIngredientsMap.get(ingredientStack.getItem()) + ingredientStack.getCount());
+                                }
+                                else {
+                                    combinedIngredientsMap.put(ingredientStack.getItem(), ingredientStack.getCount());
+                                }
                                 break;
                             }
                         }
-                        if (has_ingredient) {
+                    }
+                    int neededIngredientAmount = combinedIngredientsMap.size();
+                    int ingredientAmount = 0;
+                    for (Item ingredientItem : combinedIngredientsMap.keySet()) {
+                        ItemStack ingredientStack = new ItemStack(ingredientItem, combinedIngredientsMap.get(ingredientItem));
+                        if (ProgressChecks.hasItem(ingredientStack.getItem(), ingredientStack.getCount(), player.currentScreenHandler)) {
                             ingredientAmount += 1;
                         }
                     }
+
                     if (ingredientAmount == neededIngredientAmount) {
                         if (!(client.currentScreen instanceof InventoryScreen)) {
                             client.setScreen(new InventoryScreen(player));
                         }
                         client.interactionManager.clickRecipe(client.player.currentScreenHandler.syncId, recipeEntry, false);
                         client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, 0, 0, SlotActionType.QUICK_MOVE, player);
+                        client.setScreen(null);
 
                         return true;
                     }
@@ -104,13 +114,13 @@ public class BaritoneUtil {
                     for (Ingredient ingredient : ingredients) {
                         List<ItemStack> ingredientStacks = Arrays.asList(ingredient.getMatchingStacks());
                         for (ItemStack ingredientStack : ingredientStacks) {
-                            if (combinedIngredientsMap.containsKey(ingredientStack.getItem())) {
-                                combinedIngredientsMap.put(ingredientStack.getItem(), combinedIngredientsMap.get(ingredientStack.getItem()) + ingredientStack.getCount());
-                            }
-                            else {
-                                combinedIngredientsMap.put(ingredientStack.getItem(), ingredientStack.getCount());
-                            }
-                            if (ProgressChecks.hasItem(ingredientStack.getItem(), ingredientStack.getCount(), player.getInventory())) {
+                            if (ProgressChecks.hasItem(ingredientStack.getItem(), ingredientStack.getCount(), player.currentScreenHandler)) {
+                                if (combinedIngredientsMap.containsKey(ingredientStack.getItem())) {
+                                    combinedIngredientsMap.put(ingredientStack.getItem(), combinedIngredientsMap.get(ingredientStack.getItem()) + ingredientStack.getCount());
+                                }
+                                else {
+                                    combinedIngredientsMap.put(ingredientStack.getItem(), ingredientStack.getCount());
+                                }
                                 break;
                             }
                         }
@@ -119,7 +129,7 @@ public class BaritoneUtil {
                     int ingredientAmount = 0;
                     for (Item ingredientItem : combinedIngredientsMap.keySet()) {
                         ItemStack ingredientStack = new ItemStack(ingredientItem, combinedIngredientsMap.get(ingredientItem));
-                        if (ProgressChecks.hasItem(ingredientStack.getItem(), ingredientStack.getCount(), player.getInventory())) {
+                        if (ProgressChecks.hasItem(ingredientStack.getItem(), ingredientStack.getCount(), player.currentScreenHandler)) {
                             ingredientAmount += 1;
                         }
                     }
@@ -127,6 +137,8 @@ public class BaritoneUtil {
                     if (ingredientAmount == neededIngredientAmount) {
                         client.interactionManager.clickRecipe(client.player.currentScreenHandler.syncId, recipeEntry, false);
                         client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, 0, 0, SlotActionType.QUICK_MOVE, player);
+                        client.setScreen(null);
+
                         return true;
                     }
                     break;

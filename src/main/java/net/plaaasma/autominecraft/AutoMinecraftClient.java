@@ -61,65 +61,51 @@ public class AutoMinecraftClient implements ClientModInitializer {
                                 }
                             }
 
-                            if (!ProgressChecks.hasItem(Items.CRAFTING_TABLE, 1, client.player.getInventory()) && !hitCraftingTable) {
-                                if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 4, client.player.getInventory())) {
-                                    if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.getInventory())) {
+                            if (!ProgressChecks.hasItem(Items.CRAFTING_TABLE, 1, client.player.currentScreenHandler) && !hitCraftingTable) {  // If we don't have a crafting table, get the ingredients and make one.
+                                if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 4, client.player.currentScreenHandler)) {
+                                    if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.currentScreenHandler)) {
                                         rootItemStack = new ItemStack(Items.OAK_LOG, 1);
                                         primBaritone.getMineProcess().mineByName("oak_log");
                                     } else {
                                         BaritoneUtil.craftItemSmall(Items.OAK_PLANKS, client);
-                                        client.currentScreen.close();
-                                        client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
                                     }
                                 } else {
                                     BaritoneUtil.craftItemSmall(Items.CRAFTING_TABLE, client);
-                                    client.currentScreen.close();
-                                    client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
                                 }
                             }
-                            else {
-                                if (!ProgressChecks.hasItem(Items.STONE_PICKAXE, 1, client.player.getInventory())) {
-                                    if (!ProgressChecks.hasItem(Items.STICK, 2, client.player.getInventory())) {
-                                        if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 2, client.player.getInventory())) {
-                                            if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.getInventory())) {
+                            else {  // If we do have a crafting table start working on progression.
+                                if (!ProgressChecks.hasItem(Items.STONE_PICKAXE, 1, client.player.currentScreenHandler)) {
+                                    if (!ProgressChecks.hasItem(Items.STICK, 2, client.player.currentScreenHandler)) {
+                                        if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 2, client.player.currentScreenHandler)) {
+                                            if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.currentScreenHandler)) {
                                                 rootItemStack = new ItemStack(Items.OAK_LOG, 1);
                                                 primBaritone.getMineProcess().mineByName("oak_log");
                                             } else {
                                                 BaritoneUtil.craftItemSmall(Items.OAK_PLANKS, client);
-                                                client.currentScreen.close();
-                                                client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
                                             }
                                         } else {
                                             BaritoneUtil.craftItemSmall(Items.STICK, client);
-                                            client.currentScreen.close();
-                                            client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
                                         }
                                     }
-                                    else if (!ProgressChecks.hasItem(Items.COBBLESTONE, 3, client.player.getInventory())) {
-                                        if (!ProgressChecks.hasItem(Items.WOODEN_PICKAXE, 1, client.player.getInventory())) {
-                                            if (!ProgressChecks.hasItem(Items.STICK, 2, client.player.getInventory())) {
-                                                if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 2, client.player.getInventory())) {
-                                                    if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.getInventory())) {
+                                    else if (!ProgressChecks.hasItem(Items.COBBLESTONE, 3, client.player.currentScreenHandler)) {
+                                        if (!ProgressChecks.hasItem(Items.WOODEN_PICKAXE, 1, client.player.currentScreenHandler)) {
+                                            if (!ProgressChecks.hasItem(Items.STICK, 2, client.player.currentScreenHandler)) {
+                                                if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 2, client.player.currentScreenHandler)) {
+                                                    if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.currentScreenHandler)) {
                                                         rootItemStack = new ItemStack(Items.OAK_LOG, 1);
                                                         primBaritone.getMineProcess().mineByName("oak_log");
                                                     } else {
                                                         BaritoneUtil.craftItemSmall(Items.OAK_PLANKS, client);
-                                                        client.currentScreen.close();
-                                                        client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
                                                     }
                                                 } else {
                                                     BaritoneUtil.craftItemSmall(Items.STICK, client);
-                                                    client.currentScreen.close();
-                                                    client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
                                                 }
-                                            } else if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 3, client.player.getInventory())) {
-                                                if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.getInventory())) {
+                                            } else if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 3, client.player.currentScreenHandler)) {
+                                                if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.currentScreenHandler)) {
                                                     rootItemStack = new ItemStack(Items.OAK_LOG, 1);
                                                     primBaritone.getMineProcess().mineByName("oak_log");
                                                 } else {
                                                     BaritoneUtil.craftItemSmall(Items.OAK_PLANKS, client);
-                                                    client.currentScreen.close();
-                                                    client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
                                                 }
                                             } else {
                                                 if (!(client.currentScreen instanceof CraftingScreen)) {
@@ -139,8 +125,10 @@ public class AutoMinecraftClient implements ClientModInitializer {
                                                     }
                                                 } else {
                                                     BaritoneUtil.craftItemLarge(Items.WOODEN_PICKAXE, client);
-//                                                    client.currentScreen.close();
-//                                                    client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
+                                                    if (client.currentScreen != null) {
+                                                        client.currentScreen.close();
+                                                        client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
+                                                    }
                                                     rootItemStack = new ItemStack(Items.CRAFTING_TABLE);
                                                     primBaritone.getMineProcess().mineByName("crafting_table");
                                                 }
@@ -169,8 +157,47 @@ public class AutoMinecraftClient implements ClientModInitializer {
                                         }
                                         else {
                                             BaritoneUtil.craftItemLarge(Items.STONE_PICKAXE, client);
-//                                            client.currentScreen.close();
-//                                            client.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
+                                            rootItemStack = new ItemStack(Items.CRAFTING_TABLE);
+                                            primBaritone.getMineProcess().mineByName("crafting_table");
+                                        }
+                                    }
+                                }
+                                else if (!ProgressChecks.hasItem(Items.STONE_AXE, 1, client.player.currentScreenHandler)) {
+                                    if (!ProgressChecks.hasItem(Items.STICK, 2, client.player.currentScreenHandler)) {
+                                        if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 2, client.player.currentScreenHandler)) {
+                                            if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.currentScreenHandler)) {
+                                                rootItemStack = new ItemStack(Items.OAK_LOG, 1);
+                                                primBaritone.getMineProcess().mineByName("oak_log");
+                                            } else {
+                                                BaritoneUtil.craftItemSmall(Items.OAK_PLANKS, client);
+                                            }
+                                        } else {
+                                            BaritoneUtil.craftItemSmall(Items.STICK, client);
+                                        }
+                                    }
+                                    else if (!ProgressChecks.hasItem(Items.COBBLESTONE, 3, client.player.currentScreenHandler)) {
+                                        rootItemStack = new ItemStack(Items.COBBLESTONE, 3);
+                                        primBaritone.getMineProcess().mineByName("stone");
+                                    }
+                                    else {
+                                        if (!(client.currentScreen instanceof CraftingScreen craftingScreen)) {
+                                            if (hitCraftingTable) {
+                                                primBaritone.getCommandManager().execute("sel clear");
+                                                client.getNetworkHandler().sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, blockHitResult, 0));
+                                            } else {
+                                                if (client.world.getBlockState(client.player.getBlockPos().offset(Direction.Axis.Y, -1)).getBlock() != Blocks.CRAFTING_TABLE) {
+                                                    BlockPos offsetPos = client.player.getBlockPos().offset(Direction.Axis.Y, -1);
+                                                    primBaritone.getSelectionManager().addSelection(new BetterBlockPos(offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()), new BetterBlockPos(offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
+                                                    primBaritone.getCommandManager().execute("sel fill crafting_table");
+                                                    rootItemStack = new ItemStack(Items.AIR);
+                                                }
+                                                else {
+                                                    client.player.setPitch(90f);
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            BaritoneUtil.craftItemLarge(Items.STONE_AXE, client);
                                             rootItemStack = new ItemStack(Items.CRAFTING_TABLE);
                                             primBaritone.getMineProcess().mineByName("crafting_table");
                                         }
@@ -178,7 +205,7 @@ public class AutoMinecraftClient implements ClientModInitializer {
                                 }
                             }
                         } else {
-                            if (ProgressChecks.hasItem(rootItemStack.getItem(), rootItemStack.getCount(), client.player.getInventory()) && !rootItemStack.isOf(Items.AIR)) {
+                            if (ProgressChecks.hasItem(rootItemStack.getItem(), rootItemStack.getCount(), client.player.currentScreenHandler) && !rootItemStack.isOf(Items.AIR)) {
                                 BaritoneUtil.cancelAllGoals(primBaritone);
                             }
                         }
