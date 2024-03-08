@@ -9,14 +9,17 @@
 	],
 	"contact": {
 		"homepage": "https://yourmom.com/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/Plaaasma/autominecraft-1.20.4"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/autominecraft/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
 			"net.plaaasma.autominecraft.AutoMinecraft"
+		],
+		"client": [
+			"net.plaaasma.autominecraft.AutoMinecraftClient"
 		]
 	},
 	"mixins": [
