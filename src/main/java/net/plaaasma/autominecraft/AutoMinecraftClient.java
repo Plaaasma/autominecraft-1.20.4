@@ -31,6 +31,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import baritone.api.BaritoneAPI;
@@ -43,6 +44,7 @@ public class AutoMinecraftClient implements ClientModInitializer {
     public static final Logger C_LOGGER = LoggerFactory.getLogger("autominecraftclient");
 
     private static ItemStack rootItemStack = new ItemStack(Items.AIR);
+    private static BlockPos portalStartPos = null;
 
     @Override
     public void onInitializeClient() {
@@ -66,7 +68,7 @@ public class AutoMinecraftClient implements ClientModInitializer {
                             boolean hitFurnace = false;
                             boolean hitObsidian = false;
                             BlockHitResult blockHitResult = null;
-                            if (hitResult != null) {
+                            if (hitResult instanceof BlockHitResult) {
                                 blockHitResult = (BlockHitResult) hitResult;
 
                                 BlockState hitBlockState = client.world.getBlockState(blockHitResult.getBlockPos());
@@ -326,9 +328,39 @@ public class AutoMinecraftClient implements ClientModInitializer {
                                     }
                                     else if (!ProgressChecks.hasItem(Items.OBSIDIAN, 10, client.player.currentScreenHandler) && !client.world.getDimension().toString().contains("nether")) {
                                         // Light nether portal and go through it
-                                        if (hitObsidian && ProgressChecks.hasItem(Items.FLINT_AND_STEEL, 1, client.player.currentScreenHandler)) {
-                                            BaritoneUtil.equipItem(Items.FLINT_AND_STEEL, client, client.player.currentScreenHandler);
-                                            client.interactionManager.interactBlock(client.player, client.player.getActiveHand(), blockHitResult);
+                                        if (client.world.getBlockState(client.player.getBlockPos().offset(Direction.Axis.Y, -1)).getBlock() == Blocks.OBSIDIAN && ProgressChecks.hasItem(Items.FLINT_AND_STEEL, 1, client.player.currentScreenHandler)) {
+                                            boolean moveToPortal = false;
+                                            if (portalStartPos != null) {
+                                                if (Math.sqrt(client.player.getBlockPos().getSquaredDistance(portalStartPos.getX(), portalStartPos.getY(), portalStartPos.getZ())) > 0) {
+                                                    moveToPortal = true;
+                                                }
+                                            }
+                                            if (moveToPortal) {
+                                                primBaritone.getCommandManager().execute("goto " + portalStartPos.getX() + " " + portalStartPos.getY() + " " + portalStartPos.getZ());
+                                                primBaritone.getCommandManager().execute("path");
+                                                portalStartPos = null;
+                                            }
+                                            else {
+                                                if (BaritoneUtil.blockInPortalRegion(client)) {
+                                                    primBaritone.getSelectionManager().removeAllSelections();
+                                                    BlockPos playerPos = client.player.getBlockPos();
+                                                    portalStartPos = client.player.getBlockPos();
+                                                    // Inside of the nether portal
+                                                    primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() - 1, playerPos.getY(), playerPos.getZ()), new BetterBlockPos(playerPos.getX(), playerPos.getY() + 2, playerPos.getZ()));
+                                                    // Execute command to place the obsidian
+                                                    primBaritone.getCommandManager().execute("sel fill air");
+                                                }
+                                                else {
+                                                    if (client.player.getStackInHand(client.player.getActiveHand()).isOf(Items.FLINT_AND_STEEL)) {
+                                                        client.player.setPitch(90f);
+                                                        client.interactionManager.interactBlock(client.player, client.player.getActiveHand(), blockHitResult);
+                                                        portalStartPos = null;
+                                                    }
+                                                    else {
+                                                        BaritoneUtil.equipItem(Items.FLINT_AND_STEEL, client, client.player.currentScreenHandler);
+                                                    }
+                                                }
+                                            }
                                         }
                                         else {
                                             // Get obsidian
@@ -994,7 +1026,8 @@ public class AutoMinecraftClient implements ClientModInitializer {
                                                             primBaritone.getMineProcess().mineByName("crafting_table");
                                                         }
                                                     }
-                                                } else if (!ProgressChecks.hasItem(Items.IRON_AXE, 1, client.player.currentScreenHandler)) {
+                                                }
+                                                else if (!ProgressChecks.hasItem(Items.IRON_AXE, 1, client.player.currentScreenHandler)) {
                                                     if (!ProgressChecks.hasItem(Items.STICK, 2, client.player.currentScreenHandler)) {
                                                         if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 2, client.player.currentScreenHandler)) {
                                                             if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.currentScreenHandler)) {
@@ -1202,7 +1235,8 @@ public class AutoMinecraftClient implements ClientModInitializer {
                                                             primBaritone.getMineProcess().mineByName("crafting_table");
                                                         }
                                                     }
-                                                } else if (!ProgressChecks.hasItem(Items.STICK, 2, client.player.currentScreenHandler)) {
+                                                }
+                                                else if (!ProgressChecks.hasItem(Items.STICK, 2, client.player.currentScreenHandler)) {
                                                     if (!ProgressChecks.hasItem(Items.OAK_PLANKS, 2, client.player.currentScreenHandler)) {
                                                         if (!ProgressChecks.hasItem(Items.OAK_LOG, 1, client.player.currentScreenHandler)) {
                                                             rootItemStack = new ItemStack(Items.OAK_LOG, 1);
@@ -1213,10 +1247,12 @@ public class AutoMinecraftClient implements ClientModInitializer {
                                                     } else {
                                                         BaritoneUtil.craftItemSmall(Items.STICK, client);
                                                     }
-                                                } else if (!ProgressChecks.hasItem(Items.DIAMOND, 1, client.player.currentScreenHandler)) {
-                                                    rootItemStack = new ItemStack(Items.DIAMOND, 3);
+                                                }
+                                                else if (!ProgressChecks.hasItem(Items.DIAMOND, 1, client.player.currentScreenHandler)) {
+                                                    rootItemStack = new ItemStack(Items.DIAMOND, 1);
                                                     primBaritone.getMineProcess().mineByName("diamond_ore");
-                                                } else {
+                                                }
+                                                else {
                                                     if (!(client.currentScreen instanceof CraftingScreen craftingScreen)) {
                                                         if (hitCraftingTable) {
                                                             primBaritone.getCommandManager().execute("sel clear");
@@ -1246,17 +1282,42 @@ public class AutoMinecraftClient implements ClientModInitializer {
                                     }
                                     else {
                                         if (!client.world.getDimension().toString().contains("nether")) {
-                                            BlockPos playerPos = client.player.getBlockPos();
-                                            // Bottom of the nether portal
-                                            primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() - 1, playerPos.getY() - 1, playerPos.getZ()), new BetterBlockPos(playerPos.getX(), playerPos.getY() - 1, playerPos.getZ()));
-                                            // Top of the nether portal
-                                            primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() - 1, playerPos.getY() + 3, playerPos.getZ()), new BetterBlockPos(playerPos.getX(), playerPos.getY() + 3, playerPos.getZ()));
-                                            // Side 1 of the nether portal
-                                            primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() - 2, playerPos.getY(), playerPos.getZ()), new BetterBlockPos(playerPos.getX() - 2, playerPos.getY() + 2, playerPos.getZ()));
-                                            // Side 2 of the nether portal
-                                            primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() + 1, playerPos.getY(), playerPos.getZ()), new BetterBlockPos(playerPos.getX() + 1, playerPos.getY() + 2, playerPos.getZ()));
-                                            // Execute command to place the obsidian
-                                            primBaritone.getCommandManager().execute("sel fill obsidian");
+                                            boolean moveToPortal = false;
+                                            if (portalStartPos != null) {
+                                                if (Math.sqrt(client.player.getBlockPos().getSquaredDistance(portalStartPos.getX(), portalStartPos.getY(), portalStartPos.getZ())) > 0) {
+                                                    moveToPortal = true;
+                                                }
+                                            }
+                                            if (moveToPortal) {
+                                                primBaritone.getCommandManager().execute("goto " + portalStartPos.getX() + " " + portalStartPos.getY() + " " + portalStartPos.getZ());
+                                                primBaritone.getCommandManager().execute("path");
+                                                portalStartPos = null;
+                                            }
+                                            else {
+                                                if (BaritoneUtil.blockInPortalRegion(client)) {
+                                                    primBaritone.getSelectionManager().removeAllSelections();
+                                                    BlockPos playerPos = client.player.getBlockPos();
+                                                    portalStartPos = client.player.getBlockPos();
+                                                    // Inside of the nether portal
+                                                    primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() - 1, playerPos.getY(), playerPos.getZ()), new BetterBlockPos(playerPos.getX(), playerPos.getY() + 2, playerPos.getZ()));
+                                                    // Execute command to place the obsidian
+                                                    primBaritone.getCommandManager().execute("sel fill air");
+                                                } else {
+                                                    primBaritone.getSelectionManager().removeAllSelections();
+                                                    BlockPos playerPos = client.player.getBlockPos();
+                                                    portalStartPos = playerPos;
+                                                    // Bottom of the nether portal
+                                                    primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() - 1, playerPos.getY() - 1, playerPos.getZ()), new BetterBlockPos(playerPos.getX(), playerPos.getY() - 1, playerPos.getZ()));
+                                                    // Top of the nether portal
+                                                    primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() - 1, playerPos.getY() + 3, playerPos.getZ()), new BetterBlockPos(playerPos.getX(), playerPos.getY() + 3, playerPos.getZ()));
+                                                    // Side 1 of the nether portal
+                                                    primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() - 2, playerPos.getY(), playerPos.getZ()), new BetterBlockPos(playerPos.getX() - 2, playerPos.getY() + 2, playerPos.getZ()));
+                                                    // Side 2 of the nether portal
+                                                    primBaritone.getSelectionManager().addSelection(new BetterBlockPos(playerPos.getX() + 1, playerPos.getY(), playerPos.getZ()), new BetterBlockPos(playerPos.getX() + 1, playerPos.getY() + 2, playerPos.getZ()));
+                                                    // Execute command to place the obsidian
+                                                    primBaritone.getCommandManager().execute("sel fill obsidian");
+                                                }
+                                            }
                                         }
                                         else {
                                             primBaritone.getGetToBlockProcess().getToBlock(Blocks.SPAWNER);
@@ -1267,6 +1328,13 @@ public class AutoMinecraftClient implements ClientModInitializer {
                         } else {
                             if (ProgressChecks.hasItem(rootItemStack.getItem(), rootItemStack.getCount(), client.player.currentScreenHandler) && !rootItemStack.isOf(Items.AIR)) {
                                 BaritoneUtil.cancelAllGoals(primBaritone);
+                                rootItemStack = new ItemStack(Items.AIR);
+                            }
+                            else{
+                                if (rootItemStack.isOf(Items.OBSIDIAN) && client.world.getBlockState(client.player.getBlockPos()).getBlock() == Blocks.NETHER_PORTAL) {
+                                    BaritoneUtil.cancelAllGoals(primBaritone);
+                                    rootItemStack = new ItemStack(Items.AIR);
+                                }
                             }
                         }
                     }

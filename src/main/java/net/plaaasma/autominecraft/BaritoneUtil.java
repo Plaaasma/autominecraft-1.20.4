@@ -2,6 +2,7 @@ package net.plaaasma.autominecraft;
 
 import baritone.api.IBaritone;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -11,6 +12,7 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
@@ -193,14 +195,18 @@ public class BaritoneUtil {
             for (Slot slot : inventoryScreenHandler.slots) {
                 ItemStack slotStack = slot.getStack();
                 Item slotItem = slotStack.getItem();
-                if (!itemWhitelist.containsKey(slotItem)) {
-                    client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, slot.id, 0, SlotActionType.THROW, client.player);
-                } else {
-                    if (seenItems.contains(slotItem)) {
-                        client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, slot.id, 0, SlotActionType.THROW, client.player);
+                if (slotItem != Items.AIR) {
+                    if (!itemWhitelist.containsKey(slotItem)) {
+                        client.interactionManager.clickSlot(inventoryScreenHandler.syncId, slot.id, 0, SlotActionType.THROW, client.player);
+                    } else {
+                        if (seenItems.contains(slotItem)) {
+                            client.interactionManager.clickSlot(inventoryScreenHandler.syncId, slot.id, 0, SlotActionType.THROW, client.player);
+                        }
+                    }
+                    if (slotStack.getCount() >= 64) {
+                        seenItems.add(slot.getStack().getItem());
                     }
                 }
-                seenItems.add(slot.getStack().getItem());
             }
             client.setScreen(null);
         }
@@ -211,9 +217,25 @@ public class BaritoneUtil {
             ItemStack slotStack = slot.getStack();
             Item slotItem = slotStack.getItem();
             if (slotItem == item) {
-                client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, slot.id, 0, SlotActionType.SWAP, client.player);
+                client.interactionManager.clickSlot(inventoryHandler.syncId, slot.id, 0, SlotActionType.SWAP, client.player);
+                client.player.getInventory().selectedSlot = 0;
                 return;
             }
         }
+    }
+
+    public static boolean blockInPortalRegion(MinecraftClient client) {
+        ClientWorld clientWorld = client.world;
+        BlockPos playerPos = client.player.getBlockPos();
+        for (int x = -1; x < 1; x++) {
+            for (int y = 0; y < 2; y++) {
+                Block currentBlock = clientWorld.getBlockState(new BlockPos(playerPos.getX() + x, playerPos.getY() + y, playerPos.getZ())).getBlock();
+                if (currentBlock != Blocks.AIR && currentBlock != Blocks.OBSIDIAN && currentBlock != Blocks.NETHER_PORTAL && currentBlock != Blocks.FIRE) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
