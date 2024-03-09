@@ -3,6 +3,7 @@ package net.plaaasma.autominecraft;
 import baritone.api.IBaritone;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CraftingScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -15,6 +16,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.network.packet.c2s.play.CraftRequestC2SPacket;
 import net.minecraft.network.packet.c2s.play.RecipeBookDataC2SPacket;
@@ -37,6 +39,33 @@ import java.util.*;
 import java.util.List;
 
 public class BaritoneUtil {
+    private static HashMap<Item, Integer> itemWhitelist = new HashMap<>() {{
+        // MATERIALS
+        put(Items.COBBLESTONE, 128);
+        put(Items.IRON_INGOT, 64);
+        put(Items.RAW_IRON, 64);
+        put(Items.FLINT, 64);
+        put(Items.DIAMOND, 64);
+        put(Items.OAK_LOG, 64);
+        put(Items.OAK_WOOD, 64);
+        put(Items.OAK_PLANKS, 64);
+        put(Items.STICK, 64);
+        put(Items.OBSIDIAN, 64);
+        put(Items.CRAFTING_TABLE, 64);
+        put(Items.FURNACE, 64);
+        put(Items.COAL, 64);
+
+        // TOOLS
+        put(Items.WOODEN_PICKAXE, 1);
+        put(Items.STONE_PICKAXE, 1);
+        put(Items.STONE_AXE, 1);
+        put(Items.IRON_PICKAXE, 1);
+        put(Items.IRON_AXE, 1);
+        put(Items.DIAMOND_PICKAXE, 1);
+        put(Items.DIAMOND_SHOVEL, 1);
+        put(Items.FLINT_AND_STEEL, 1);
+    }};
+
     public static void cancelAllGoals(IBaritone baritone) {
 //        baritone.getPathingBehavior().cancelEverything();
         baritone.getCommandManager().execute("stop");
@@ -149,5 +178,42 @@ public class BaritoneUtil {
             System.out.println("Recipe manager null");
         }
         return false;
+    }
+
+    public static void yeetItems(MinecraftClient client) {
+        if (client.currentScreen == null) {
+            InventoryScreen inventoryScreen = new InventoryScreen(client.player);
+            if (!(client.currentScreen instanceof InventoryScreen)) {
+                client.setScreen(inventoryScreen);
+            }
+
+            ScreenHandler inventoryScreenHandler = inventoryScreen.getScreenHandler();
+
+            List<Item> seenItems = new ArrayList<>();
+            for (Slot slot : inventoryScreenHandler.slots) {
+                ItemStack slotStack = slot.getStack();
+                Item slotItem = slotStack.getItem();
+                if (!itemWhitelist.containsKey(slotItem)) {
+                    client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, slot.id, 0, SlotActionType.THROW, client.player);
+                } else {
+                    if (seenItems.contains(slotItem)) {
+                        client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, slot.id, 0, SlotActionType.THROW, client.player);
+                    }
+                }
+                seenItems.add(slot.getStack().getItem());
+            }
+            client.setScreen(null);
+        }
+    }
+
+    public static void equipItem(Item item, MinecraftClient client, ScreenHandler inventoryHandler) {
+        for (Slot slot : inventoryHandler.slots) {
+            ItemStack slotStack = slot.getStack();
+            Item slotItem = slotStack.getItem();
+            if (slotItem == item) {
+                client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, slot.id, 0, SlotActionType.SWAP, client.player);
+                return;
+            }
+        }
     }
 }
