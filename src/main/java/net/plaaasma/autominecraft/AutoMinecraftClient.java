@@ -53,6 +53,8 @@ public class AutoMinecraftClient implements ClientModInitializer {
             if (primBaritone != null) {
                 primBaritone.getSelectionManager().removeAllSelections();
                 BaritoneUtil.cancelAllGoals(primBaritone);
+                rootItemStack = new ItemStack(Items.AIR);
+                portalStartPos = null;
             }
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
