@@ -18,10 +18,10 @@ public class ChatScreenMixin {
     @Inject(at = @At("HEAD"), method = "sendMessage", cancellable = true)
     public void sendMessage(String chatText, boolean addToHistory, CallbackInfoReturnable<Boolean> cir) {
         if (chatText.equals("--")) {
-            AutoMinecraftClient.ENABLED = !AutoMinecraftClient.ENABLED;
-            MinecraftClient.getInstance().player.sendMessage(AutoMinecraftClient.ENABLED ? Text.of("YEET!!") : Text.of("Fine I'll stop :("));
+            AutoMinecraftClient.NETHER = !AutoMinecraftClient.NETHER;
+            MinecraftClient.getInstance().player.sendMessage(AutoMinecraftClient.NETHER ? Text.of("YEET!!") : Text.of("Fine I'll stop :("));
 
-            if (!AutoMinecraftClient.ENABLED) {
+            if (!AutoMinecraftClient.NETHER) {
                 IBaritone primBaritone = BaritoneAPI.getProvider().getPrimaryBaritone();
                 primBaritone.getSelectionManager().removeAllSelections();
                 BaritoneUtil.cancelAllGoals(primBaritone);
