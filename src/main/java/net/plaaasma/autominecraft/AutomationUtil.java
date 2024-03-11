@@ -587,9 +587,9 @@ public class AutomationUtil {
         ClientWorld clientWorld = client.world;
         BlockPos clientPos = client.player.getBlockPos();
         BlockPos fLavaPos = null;
-        for (int x_offset = 32; x_offset >= -32 && fLavaPos == null; x_offset--) {
-            for (int y_offset = 32; y_offset >= -32 && fLavaPos == null; y_offset--) {
-                for (int z_offset = 32; z_offset >= -32 && fLavaPos == null; z_offset--) {
+        for (int x_offset = 64; x_offset >= -64 && fLavaPos == null; x_offset--) {
+            for (int y_offset = 64; y_offset >= -64 && fLavaPos == null; y_offset--) {
+                for (int z_offset = 64; z_offset >= -64 && fLavaPos == null; z_offset--) {
                     BlockPos offsetPos = new BlockPos(clientPos.getX() + x_offset, clientPos.getY() + y_offset, clientPos.getZ() + z_offset);
                     BlockPos upOffsetPos = new BlockPos(offsetPos.getX(), offsetPos.getY() + 1, offsetPos.getZ());
                     BlockPos xOffsetPos = new BlockPos(offsetPos.getX() + 1, offsetPos.getY(), offsetPos.getZ());
