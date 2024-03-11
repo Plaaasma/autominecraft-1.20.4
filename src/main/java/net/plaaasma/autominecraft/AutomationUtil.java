@@ -708,9 +708,9 @@ public class AutomationUtil {
         ClientWorld clientWorld = client.world;
         BlockPos clientPos = client.player.getBlockPos();
         int obsidianCount = 0;
-        for (int x_offset = -16; x_offset <= 16; x_offset++) {
-            for (int y_offset = -16; y_offset <= 16; y_offset++) {
-                for (int z_offset = -16; z_offset <= 16; z_offset++) {
+        for (int x_offset = -32; x_offset <= 32; x_offset++) {
+            for (int y_offset = -32; y_offset <= 32; y_offset++) {
+                for (int z_offset = -32; z_offset <= 32; z_offset++) {
                     BlockPos offsetPos = new BlockPos(clientPos.getX() + x_offset, clientPos.getY() + y_offset, clientPos.getZ() + z_offset);
                     BlockPos upOffsetPos = new BlockPos(offsetPos.getX(), offsetPos.getY() + 1, offsetPos.getZ());
                     BlockPos xOffsetPos = new BlockPos(offsetPos.getX() + 1, offsetPos.getY(), offsetPos.getZ());
@@ -844,14 +844,14 @@ public class AutomationUtil {
                                     doGetDiamondShovel(client, primBaritone, hitCraftingTable, hitFurnace, blockHitResult);
                                 }
                                 else {
-                                    if (!ProgressChecks.hasItem(Items.WATER_BUCKET, 1, client.player.currentScreenHandler)) {
-                                        if (client.world.getTime() > waterPlaceTime + 48 || client.world.getTime() < waterPlaceTime) {
-                                            doGetWaterBucket(client, primBaritone, hitCraftingTable, hitFurnace, blockHitResult);
-                                            waterPlaceTime = 0;
+                                    if (!mineObsidian(client, primBaritone)) {
+                                        if (!ProgressChecks.hasItem(Items.WATER_BUCKET, 1, client.player.currentScreenHandler)) {
+                                            if (client.world.getTime() > waterPlaceTime + 48 || client.world.getTime() < waterPlaceTime) {
+                                                doGetWaterBucket(client, primBaritone, hitCraftingTable, hitFurnace, blockHitResult);
+                                                waterPlaceTime = 0;
+                                            }
                                         }
-                                    }
-                                    else {
-                                        if (!mineObsidian(client, primBaritone)) {
+                                        else {
                                             doLavaToObsidian(client, primBaritone);
                                         }
                                     }
