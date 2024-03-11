@@ -36,6 +36,7 @@ public class AutomationUtil {
     public static BlockPos waterPos = null;
     public static BlockPos lavaPos = null;
     public static int waterPlaceTime = 0;
+    public static int waterPickupTime = 0;
 
     public static void handleFurnaceMenu(MinecraftClient client, IBaritone primBaritone, FurnaceScreenHandler furnaceScreenHandler) {
         // Slot Indexes
@@ -525,7 +526,7 @@ public class AutomationUtil {
             for (int y_offset = 4; y_offset >= -4 && fWaterPos == null; y_offset--) {
                 for (int z_offset = 4; z_offset >= -4 && fWaterPos == null; z_offset--) {
                     BlockPos offsetPos = new BlockPos(clientPos.getX() + x_offset, clientPos.getY() + y_offset, clientPos.getZ() + z_offset);
-                    if (offsetPos.getY() < 70) {
+                    if (offsetPos.getY() <= 40) {
                         BlockPos upOffsetPos = new BlockPos(offsetPos.getX(), offsetPos.getY() + 1, offsetPos.getZ());
 
                         BlockState stateAtOffsetPos = clientWorld.getBlockState(offsetPos);
@@ -554,7 +555,7 @@ public class AutomationUtil {
                 for (int y_offset = 32; y_offset >= -32 && fWaterPos == null; y_offset--) {
                     for (int z_offset = 32; z_offset >= -32 && fWaterPos == null; z_offset--) {
                         BlockPos offsetPos = new BlockPos(clientPos.getX() + x_offset, clientPos.getY() + y_offset, clientPos.getZ() + z_offset);
-                        if (offsetPos.getY() < 70) {
+                        if (offsetPos.getY() <= 40) {
                             BlockPos upOffsetPos = new BlockPos(offsetPos.getX(), offsetPos.getY() + 1, offsetPos.getZ());
 
                             BlockState stateAtOffsetPos = clientWorld.getBlockState(offsetPos);
@@ -604,7 +605,7 @@ public class AutomationUtil {
                     BlockState stateAtNegXOffsetPos = clientWorld.getBlockState(negXOffsetPos);
                     BlockState stateAtNegZOffsetPos = clientWorld.getBlockState(negZOffsetPos);
 
-                    if ((stateAtOffsetPos.isOf(Blocks.LAVA) && stateAtOffsetPos.get(FluidBlock.LEVEL) == 0) && stateAtUpOffsetPos.isOf(Blocks.AIR) && !stateAtXOffsetPos.isOf(Blocks.LAVA) && (stateAtZOffsetPos.isOf(Blocks.LAVA) && stateAtZOffsetPos.get(FluidBlock.LEVEL) == 0) && (stateAtNegXOffsetPos.isOf(Blocks.LAVA) && stateAtNegXOffsetPos.get(FluidBlock.LEVEL) == 0) && (stateAtNegZOffsetPos.isOf(Blocks.LAVA) && stateAtNegZOffsetPos.get(FluidBlock.LEVEL) == 0)) {
+                    if ((stateAtOffsetPos.isOf(Blocks.LAVA) && stateAtOffsetPos.get(FluidBlock.LEVEL) == 0) && (stateAtUpOffsetPos.isOf(Blocks.AIR) || stateAtUpOffsetPos.isOf(Blocks.CAVE_AIR)) && !stateAtXOffsetPos.isOf(Blocks.LAVA) && (stateAtZOffsetPos.isOf(Blocks.LAVA) && stateAtZOffsetPos.get(FluidBlock.LEVEL) == 0) && (stateAtNegXOffsetPos.isOf(Blocks.LAVA) && stateAtNegXOffsetPos.get(FluidBlock.LEVEL) == 0) && (stateAtNegZOffsetPos.isOf(Blocks.LAVA) && stateAtNegZOffsetPos.get(FluidBlock.LEVEL) == 0)) {
                         fLavaPos = xOffsetPos.offset(Direction.Axis.Y, 1);
                     }
                 }
@@ -627,6 +628,7 @@ public class AutomationUtil {
                     doChatLogMessage(client, "Filling bucket with water.");
                     client.player.setPitch(90f);
                     client.interactionManager.interactItem(client.player, client.player.getActiveHand());
+                    waterPickupTime = (int) client.world.getTime();
                     waterPos = null;
                 }
                 else {
@@ -648,13 +650,17 @@ public class AutomationUtil {
                     }
                     else {
                         if (Math.sqrt(waterPos.getSquaredDistance(client.player.getPos().x, client.player.getPos().y, client.player.getPos().z)) <= 4.5) {
-                            client.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(waterPos.getX(), waterPos.getY(), waterPos.getZ()));
+//                            float newYaw = calculateLookYaw(client, waterPos.getX(), waterPos.getZ());
+//                            float newPitch = calculateLookPitch(client, waterPos.getX(), waterPos.getY(), waterPos.getZ());
+//                            client.player.setYaw(newYaw);
+//                            client.player.setPitch(newPitch);
+                            client.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, waterPos.toCenterPos());
                             if (client.player.getStackInHand(client.player.getActiveHand()).isOf(Items.BUCKET)) {
                                 primBaritone.getSelectionManager().removeAllSelections();
                                 BaritoneUtil.cancelAllGoals(primBaritone);
                                 doChatLogMessage(client, "Filling bucket with water.");
-                                client.player.setPitch(90f);
                                 client.interactionManager.interactItem(client.player, client.player.getActiveHand());
+                                waterPickupTime = (int) client.world.getTime();
                                 waterPos = null;
                             }
                             else {
@@ -670,6 +676,26 @@ public class AutomationUtil {
                 }
             }
         }
+    }
+
+    public static float calculateLookYaw(MinecraftClient client, int targetX, int targetZ) {
+        double d0 = targetX - client.player.getBlockX();
+        double d2 = targetZ - client.player.getBlockZ();
+
+        float f = (float) (MathUtil.atan2(d2, d0) * (double) (180F / (float) Math.PI)) - 90.0F;
+        return MathUtil.rotlerp(client.player.getYaw(), f, 90F);
+    }
+
+    public static float calculateLookPitch(MinecraftClient client, int targetX, int targetY, int targetZ) {
+        double d0 = targetX - client.player.getBlockX();
+        double d2 = targetZ - client.player.getBlockZ();
+        double d1;
+
+        d1 = targetY - client.player.getEyeY();
+
+        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+        float f1 = (float)(-(MathUtil.atan2(d1, d3) * (double)(180F / (float)Math.PI)));
+        return MathUtil.rotlerp(client.player.getPitch(), f1, 90F);
     }
 
     public static void doLavaToObsidian(MinecraftClient client, IBaritone primBaritone) {
@@ -852,7 +878,10 @@ public class AutomationUtil {
                                             }
                                         }
                                         else {
-                                            doLavaToObsidian(client, primBaritone);
+                                            if (client.world.getTime() > waterPickupTime + 60 || client.world.getTime() < waterPickupTime) {
+                                                doLavaToObsidian(client, primBaritone);
+                                                waterPickupTime = 0;
+                                            }
                                         }
                                     }
                                 }
