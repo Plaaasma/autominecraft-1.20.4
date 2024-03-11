@@ -66,6 +66,9 @@ public class BaritoneUtil {
         put(Items.DIAMOND_PICKAXE, 1);
         put(Items.DIAMOND_SHOVEL, 1);
         put(Items.FLINT_AND_STEEL, 1);
+        put(Items.BUCKET, 1);
+        put(Items.WATER_BUCKET, 1);
+        put(Items.LAVA_BUCKET, 1);
     }};
 
     public static void cancelAllGoals(IBaritone baritone) {
@@ -77,7 +80,8 @@ public class BaritoneUtil {
         return baritone.getBuilderProcess().isActive() || baritone.getMineProcess().isActive() || baritone.getCustomGoalProcess().isActive();
     }
 
-    public static boolean craftItemSmall(Item item, MinecraftClient client) {
+    public static void craftItemSmall(Item item, MinecraftClient client) {
+        AutomationUtil.doChatLogMessage(client, "Crafting " + item.getName().getString());
         ClientPlayerEntity player = client.player;
         RecipeManager recipeManager = client.world.getRecipeManager();
 
@@ -119,7 +123,7 @@ public class BaritoneUtil {
                         client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, 0, 0, SlotActionType.QUICK_MOVE, player);
                         client.setScreen(null);
 
-                        return true;
+                        return;
                     }
                     break;
                 }
@@ -128,10 +132,10 @@ public class BaritoneUtil {
         else {
             System.out.println("Recipe manager null");
         }
-        return false;
     }
 
-    public static boolean craftItemLarge(Item item, MinecraftClient client) {
+    public static void craftItemLarge(Item item, MinecraftClient client) {
+        AutomationUtil.doChatLogMessage(client, "Crafting " + item.getName().getString());
         ClientPlayerEntity player = client.player;
         RecipeManager recipeManager = client.world.getRecipeManager();
 
@@ -170,7 +174,7 @@ public class BaritoneUtil {
                         client.interactionManager.clickSlot(client.player.currentScreenHandler.syncId, 0, 0, SlotActionType.QUICK_MOVE, player);
                         client.setScreen(null);
 
-                        return true;
+                        return;
                     }
                     break;
                 }
@@ -179,7 +183,6 @@ public class BaritoneUtil {
         else {
             System.out.println("Recipe manager null");
         }
-        return false;
     }
 
     public static void yeetItems(MinecraftClient client) {
@@ -228,9 +231,9 @@ public class BaritoneUtil {
         ClientWorld clientWorld = client.world;
         BlockPos playerPos = client.player.getBlockPos();
         for (int x = -1; x < 1; x++) {
-            for (int y = 0; y < 2; y++) {
+            for (int y = 0; y < 3; y++) {
                 Block currentBlock = clientWorld.getBlockState(new BlockPos(playerPos.getX() + x, playerPos.getY() + y, playerPos.getZ())).getBlock();
-                if (currentBlock != Blocks.AIR && currentBlock != Blocks.OBSIDIAN && currentBlock != Blocks.NETHER_PORTAL && currentBlock != Blocks.FIRE) {
+                if (currentBlock != Blocks.AIR && currentBlock != Blocks.NETHER_PORTAL && currentBlock != Blocks.FIRE) {
                     return true;
                 }
             }

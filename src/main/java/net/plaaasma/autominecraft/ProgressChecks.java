@@ -24,6 +24,18 @@ public class ProgressChecks {
         return false;
     }
 
+    public static int getItemCount(Item item, ScreenHandler inventoryHandler) {
+        for (Slot slot : inventoryHandler.slots) {
+            ItemStack slotStack = slot.getStack();
+            Item slotItem = slotStack.getItem();
+            if (slotItem == item) {
+                return slotStack.getCount();
+            }
+        }
+
+        return 0;
+    }
+
     public static int getItemSlot(Item item, Integer amount, PlayerInventory inventory) {
         int slotNum = inventory.getSlotWithStack(new ItemStack(item));
         if (slotNum > -1) {
@@ -50,6 +62,17 @@ public class ProgressChecks {
             ItemStack slotStack = slot.getStack();
             if (slotStack.isOf(Items.RAW_IRON)) {
                 return slot.id;
+            }
+        }
+
+        return -1;
+    }
+
+    public static int getSmeltableIndex(ScreenHandler inventoryHandler) {
+        for (Slot slot : inventoryHandler.slots) {
+            ItemStack slotStack = slot.getStack();
+            if (slotStack.isOf(Items.RAW_IRON)) {
+                return slot.getIndex();
             }
         }
 

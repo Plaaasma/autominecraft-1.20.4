@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.plaaasma.autominecraft.AutoMinecraftClient;
+import net.plaaasma.autominecraft.AutomationUtil;
 import net.plaaasma.autominecraft.BaritoneUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,6 +26,9 @@ public class ChatScreenMixin {
                 IBaritone primBaritone = BaritoneAPI.getProvider().getPrimaryBaritone();
                 primBaritone.getSelectionManager().removeAllSelections();
                 BaritoneUtil.cancelAllGoals(primBaritone);
+                AutomationUtil.portalStartPos = null;
+                AutomationUtil.waterPos = null;
+                AutomationUtil.lavaPos = null;
             }
 
             MinecraftClient.getInstance().inGameHud.getChatHud().addToMessageHistory(chatText);
